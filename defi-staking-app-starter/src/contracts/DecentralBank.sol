@@ -80,7 +80,7 @@ contract DecentralBank {
         // Iterate through stakers array
         for (uint i = 0; i < stakers.length; i++) {
             address recipient = stakers[i];
-            uint balance = stakingBalance[recipient] / 9; //divide by 9 to create percentage incentive for stakers
+            uint balance = stakingBalance[recipient];
             if (balance > 0) {
                 // Reward will be the amount that they were staking
                 rwd.transfer(recipient, balance);

@@ -5,6 +5,8 @@ import Web3 from "web3/dist/web3.min.js";
 import Tether from "../truffle_abis/Tether.json";
 import RWD from "../truffle_abis/RWD.json";
 import DecentralBank from "../truffle_abis/DecentralBank.json";
+import Main from "./Main";
+import ParticleSettings from "./ParticleSettings";
 
 class App extends Component {
   //called immediately before mounting  occurs
@@ -124,6 +126,39 @@ class App extends Component {
     this.setState({ loading: false });
   }
 
+  //two fucntion: one that stakes and one that unstakes
+  //leverage function created in decentralBank contract: deposit Tokens and unstaking
+  //staking function: decentralBank.depositTokens(send transaction over, tarnsaction hash)
+  //depositToken..transferFrom() from Tether, require to run the function approve tarnsaction before deposit tokens
+
+  //staking function
+  //everytime we run this, reset the loading to true until finish running the function, thens et back to false
+  stakeTokens = (amount) => {
+    this.setState({ loading: true });
+    //get approval first
+    this.state.tether.methods
+      .approve(this.state.decentralBank._address, amount)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.state.decentralBank.methods //get decentralBank contract
+          .depositTokens(amount) //get depositTokens function, set it to the amount input
+          .send({ from: this.state.account }) //send it over from the account, then transaction processed
+          .on("transactionHash", (hash) => {
+            this.setState({ loading: false });
+          });
+      });
+  };
+
+  unstakeTokens = (amount) => {
+    this.setState({ loading: true });
+    this.state.decentralBank.methods
+      .unstakeTokens()
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
   //props: special feature/parameter in react, allow us to passover properties fromone component to another
   constructor(props) {
     super(props);
@@ -142,18 +177,53 @@ class App extends Component {
       rwd: {},
       decentralBank: {},
       tetherBalance: "0",
-      rwdBalance: "0",
+      rwdTokenBalance: "0",
       stakingBalance: "0",
       loading: true,
     };
   }
 
   render() {
+    let content;
+    /*conditional statement, if statment, is the state of loading is true, show LOADING PlEASE, if false do the action after :*/
+    {
+      this.state.loading
+        ? (content = (
+            <p
+              id="loader"
+              className="text-center"
+              style={{ margin: "30px", color: "white" }}
+            >
+              LOADING PLEASE...
+            </p>
+          ))
+        : (content = (
+            <Main
+              tetherBalance={this.state.tetherBalance}
+              rwdBalance={this.state.rwdTokenBalance}
+              stakingBalance={this.state.stakingBalance}
+              /*pass function as properties*/
+              stakeTokens={this.stakeTokens}
+              unstakeTokens={this.unstakeTokens}
+            />
+          ));
+    }
     return (
-      <div>
+      <div className="App" style={{ position: "relative" }}>
+        <div style={{ position: "absolute" }}>
+          <ParticleSettings />
+        </div>
         <Navbar account={this.state.account} />
-        <div>
-          <h1>{console.log(this.state.loading)}</h1>
+        <div className="container-fluid mt-5">
+          <div className="row">
+            <main
+              role="main"
+              className="col-lg-12 ml-auto mr-auto"
+              style={{ maxWidth: "1000px", minHeight: "100vm" }}
+            >
+              <div>{content}</div>
+            </main>
+          </div>
         </div>
       </div>
     );

@@ -14,7 +14,7 @@ contract Tether {
 
     // Mapping to store token balances for each address
     mapping(address => uint256) public balanceOf;
-    
+
     // Mapping to store allowances for spending tokens from one address to another
     mapping(address => mapping(address => uint256)) public allowance;
 
