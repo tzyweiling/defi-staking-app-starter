@@ -88,15 +88,17 @@ class App extends Component {
     }
 
     //load RWD contract
-    const rwdData = RWD.networks[networkID];
-    if (rwdData) {
-      const rwd = new web3.eth.Contract(RWD.abi, rwdData.address);
+    const rwdTokenData = RWD.networks[networkID];
+    if (rwdTokenData) {
+      const rwd = new web3.eth.Contract(RWD.abi, rwdTokenData.address);
       this.setState({ rwd });
 
-      let rwdBalance = await rwd.methods.balanceOf(this.state.account).call();
-      this.setState({ rwdBalance: rwdBalance.toString() });
-      //console.log({ reward_balance: rwdBalance });
-      //output: {reward_balance: '0'}
+      let rwdTokenBalance = await rwd.methods
+        .balanceOf(this.state.account)
+        .call();
+      this.setState({ rwdTokenBalance: rwdTokenBalance.toString() });
+      //console.log({ rwdTokenBalance: rwdTokenBalance });
+      //output: {rwdTokenBalance: '0'}
     } else {
       window.alert("Error! Reward token not deployed - no detected network");
     }
